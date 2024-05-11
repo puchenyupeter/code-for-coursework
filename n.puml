@@ -1,0 +1,131 @@
+@startuml
+'https://plantuml.com/class-diagram
+skinparam classAttributeIconSize 0
+
+
+
+interface INumberleModel {
+    +processInput(String): void
+    +isGameOver(): boolean
+    +isGameWon(): boolean
+    +getTargetNumber(): String
+    +getCurrentGuess(): StringBuilder
+    +getRemainingAttempts(): int
+    +startNewGame(): void
+    +getColor(String, String): Color[]
+    +getOperatorColor(String, String): Map<Character, String>
+}
+
+interface NumberleViewObserver {
+    +update(NumberleModel, Object): void
+}
+
+class NumberleModel {
+    -targetNumber: String
+    -currentGuess: StringBuilder
+    -remainingAttempts: int
+    -randomEquationMode: boolean
+    -observers: List<NumberleViewObserver>
+    +processInput(String): void
+    +isGameOver(): boolean
+    +isGameWon(): boolean
+    +getTargetNumber(): String
+    +getCurrentGuess(): StringBuilder
+    +getRemainingAttempts(): int
+    +startNewGame(): void
+    +getColor(String, String): Color[]
+    +getOperatorColor(String, String): Map<Character, String>
+    +toggleRandomEquationMode(): void
+    +addObserver(NumberleViewObserver): void
+    +removeObserver(NumberleViewObserver): void
+    +notifyObservers(): void
+}
+
+class NumberleController {
+    -model: INumberleModel
+    -view: NumberleView
+    +NumberleController(INumberleModel)
+    +setView(NumberleView): void
+    +processInput(String): void
+    +isGameOver(): boolean
+    +isGameWon(): boolean
+    +getTargetWord(): String
+    +getCurrentGuess(): StringBuilder
+    +getRemainingAttempts(): int
+    +startNewGame(): void
+    +getColor(): Color[]
+    +getOperatorColor(String, String): Map<Character, String>
+}
+
+class NumberleView {
+    -model: INumberleModel
+    -controller: NumberleController
+    -randomEquationButton: JButton
+    -frame: JFrame
+    -inputTextField: JTextField
+    -attemptsLabel: JLabel
+    -showTargetButton: JButton
+    -MatrixField: JTextField[][]
+    -specialButtonsPanel: JPanel
+    -numberButtonsPanel: JPanel
+    -currentRowIndex: int
+    -MAX_ATTEMPTS: int
+    +NumberleView(INumberleModel, NumberleController)
+    +initializeFrame(): void
+    +toggleRandomEquationMode(): void
+    +addButton(JPanel, String): void
+    +processInput(): void
+    +checkContainsNumberAndOperator(String): boolean
+    +isOperator(char): boolean
+    +addNumberToGrid(String): void
+    +gameAgain(String): void
+    +resetUI(): void
+    +resetButtonBackgroundColors(JPanel): void
+    +update(NumberleModel, Object): void
+    +updateGridColors(): void
+    +updateOperatorKeyboardColors(): void
+}
+
+INumberleModel <|.. NumberleModel
+INumberleModel <|.. NumberleController
+INumberleModel <|.. NumberleViewObserver
+NumberleModel ..> NumberleViewObserver: notifies
+NumberleController --> INumberleModel: uses
+NumberleView --> NumberleController: interacts
+NumberleView --> NumberleModel: interacts
+
+class NumberleModelTest {
+    +testCheckLength(): void
+    +testIsMathExpression(): void
+    +testIsConsecutiveOperators(): void
+    +testCompareExpressions(): void
+    +testIsGameOver_GameWon(): void
+    +testIsGameOver_AttemptsExhausted(): void
+}
+
+class NumberleCLIView {
+    -model: INumberleModel
+    -controller: NumberleController
+    -MAX_ATTEMPTS: int
+    +NumberleCLIView(INumberleModel, NumberleController)
+    +startGame(): void
+    +playRound(Scanner): void
+    +colorizeString(String, Color[]): String
+    +isValidInput(String): boolean
+    +printGuessFeedback(String): void
+    +colorizeChar(char, Color): String
+}
+
+class NumberleGUIView {
+    -model: INumberleModel
+    -controller: NumberleController
+    +NumberleGUIView(INumberleModel, NumberleController)
+    +createAndShowGUI(): void
+}
+
+NumberleCLIView ..> NumberleController: interacts
+NumberleCLIView ..> INumberleModel: interacts
+NumberleGUIView ..> NumberleView: interacts
+NumberleModelTest --> NumberleModel: test methods
+
+@enduml
