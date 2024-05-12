@@ -70,6 +70,7 @@ class NumberleView {
     -numberButtonsPanel: JPanel
     -currentRowIndex: int
     -MAX_ATTEMPTS: int
+    -firstValidGuessMade: boolean
     +NumberleView(INumberleModel, NumberleController)
     +initializeFrame(): void
     +toggleRandomEquationMode(): void
@@ -107,6 +108,7 @@ class NumberleCLIView {
     -model: INumberleModel
     -controller: NumberleController
     -MAX_ATTEMPTS: int
+    -availableNumber：List<Character>;
     +NumberleCLIView(INumberleModel, NumberleController)
     +startGame(): void
     +playRound(Scanner): void
@@ -114,6 +116,7 @@ class NumberleCLIView {
     +isValidInput(String): boolean
     +printGuessFeedback(String): void
     +colorizeChar(char, Color): String
+    +updateAvailableNumberle(String guess): void
 }
 
 class NumberleGUIView {
