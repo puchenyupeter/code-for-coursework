@@ -17,7 +17,7 @@ public class NumberleView implements Observer {
     private final JTextField[][] MatrixField = new JTextField[6][7];
     private JPanel specialButtonsPanel;
     private JPanel numberButtonsPanel;
-
+    private final JButton startNewGameButton = new JButton("Start New Game");
     // Track current row index
     private int currentRowIndex = 0;
     private final int MAX_ATTEMPTS = 6;
@@ -71,12 +71,23 @@ public class NumberleView implements Observer {
                 toggleRandomEquationMode();
             }
         });
-
+        startNewGameButton.setEnabled(false);
+        startNewGameButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                controller.startNewGame();
+                resetUI();
+                randomEquationButton.setEnabled(true);
+                startNewGameButton.setEnabled(false);
+            }
+        });
 
         // Add the showTargetButton to the checkBoxPanel
         JPanel checkBoxPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         checkBoxPanel.add(showTargetButton);
         checkBoxPanel.add(randomEquationButton);
+        checkBoxPanel.add(startNewGameButton);
+
         // Create a panel for the attempts label
         JPanel attemptsLabelPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         attemptsLabel.setText("Attempts remaining: " + controller.getRemainingAttempts());
@@ -90,7 +101,6 @@ public class NumberleView implements Observer {
         JPanel northPanel = new JPanel(new BorderLayout());
         northPanel.add(checkBoxPanel, BorderLayout.NORTH);
         northPanel.add(attemptsLabelPanel, BorderLayout.CENTER);
-
         // Add the north panel to the frame's NORTH region
         frame.add(northPanel, BorderLayout.NORTH);
 
@@ -164,6 +174,7 @@ public class NumberleView implements Observer {
         panel.add(button);
     }
 
+    private boolean firstValidGuessMade = false;
     private void processInput() {
         StringBuilder input = new StringBuilder();
         for (int col = 0; col < MatrixField[currentRowIndex].length; col++) {
@@ -198,6 +209,10 @@ public class NumberleView implements Observer {
         if (!model.compareExpressions(input.toString())) {
             JOptionPane.showMessageDialog(null, "The left side does not match the right side.", "Invalid Guess", JOptionPane.ERROR_MESSAGE);
             return;
+        }
+
+        if (!firstValidGuessMade) {
+            startNewGameButton.setEnabled(true); // Enable the start new game button after the first valid guess
         }
 
         // Call controller's method to process input
@@ -242,11 +257,13 @@ public class NumberleView implements Observer {
         String targetWord = controller.getTargetWord();
         int result = JOptionPane.showConfirmDialog(frame, status + "! The answer is " + targetWord + "\n Do you want to play again?", status, JOptionPane.WARNING_MESSAGE);
         if (result == JOptionPane.OK_OPTION) {
+            firstValidGuessMade = false;
             controller.startNewGame();
             SwingUtilities.invokeLater(() -> {
                 // Reset UI components
                 resetUI();
                 randomEquationButton.setEnabled(true);
+                startNewGameButton.setEnabled(false);
             });
 
         } else if (result == JOptionPane.CANCEL_OPTION || result == JOptionPane.CLOSED_OPTION) {
@@ -264,6 +281,7 @@ public class NumberleView implements Observer {
 
             }
         }
+        firstValidGuessMade = false;
         // Reset current input status
         currentRowIndex = 0;
         // Update attempts label
@@ -290,6 +308,9 @@ public class NumberleView implements Observer {
         // Update grid table colors based on model's color method
         updateGridColors();
         updateOperatorKeyboardColors();
+        if (controller.isGameWon() || controller.isGameOver()) {
+            firstValidGuessMade = true; // Set the flag when the game is won or over
+        }
         if (controller.isGameWon()) {
             gameAgain("Success");
         } else if (controller.isGameOver()) {
